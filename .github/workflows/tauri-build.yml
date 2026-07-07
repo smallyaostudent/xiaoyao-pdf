@@ -23,7 +23,7 @@ on:
         default: true
   workflow_dispatch:
     inputs:
-platform:
+      platform:
         description: "Platform to build (windows, macos, linux, or all)"
         required: true
         default: "windows"
