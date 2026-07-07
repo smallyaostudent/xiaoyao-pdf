@@ -122,7 +122,7 @@ tasks:
     cmds:
       - node scripts/verify-bundled-jre.mjs src-tauri/runtime/jre/release
 
-jlink:jar:
+  jlink:jar:
     desc: "Build backend JAR for Tauri bundling (host-OS natives only by default)"
     run: once
     dir: ..
