@@ -122,21 +122,18 @@ tasks:
     cmds:
       - node scripts/verify-bundled-jre.mjs src-tauri/runtime/jre/release
 
-  jlink:jar:
+jlink:jar:
     desc: "Build backend JAR for Tauri bundling (host-OS natives only by default)"
     run: once
-    dir: ..              # desktop taskfile is included with dir:frontend, so .. = repo root where gradlew.bat lives
+    dir: ..
     env:
       DISABLE_ADDITIONAL_FEATURES: "true"
     cmds:
       - echo "Building bootJar with JPDFium natives for {{.JPDFIUM_PLATFORMS}}"
-      # NOTE: Go-Task v3 on Windows special-cases any `cmd:` whose command line
-      # contains "gradlew" / "gradle.bat" and tries to resolve a wrapper jar
-      # under <cwd>/.gradle/wrapper/ before running the cmd. In our nested
-      # monorepo that path is wrong (the real wrapper is at <cwd>/gradle/wrapper/)
-      # and the cmd never starts. Use `sh:` instead — task CLI does not run
-      # any gradle/wrapper detection on `sh:` blocks.
-      - sh: ./gradlew bootJar --no-daemon -PjpdfiumPlatforms={{.JPDFIUM_PLATFORMS}}
+      - cmd: cmd /c gradlew.bat bootJar --no-daemon -PjpdfiumPlatforms={{.JPDFIUM_PLATFORMS}}
+        platforms: [windows]
+      - cmd: ./gradlew bootJar --no-daemon -PjpdfiumPlatforms={{.JPDFIUM_PLATFORMS}}
+        platforms: [linux, darwin]
       - mkdir -p frontend/editor/src-tauri/libs
       - cp app/core/build/libs/stirling-pdf-*.jar frontend/editor/src-tauri/libs/
     status:

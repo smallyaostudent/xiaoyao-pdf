@@ -172,14 +172,35 @@ jobs:
           JPDFIUM_PLATFORMS: ${{ matrix.jpdfium_platforms }}
         run: task desktop:jlink:universal-mac
 
-      - name: Prepare desktop build
+      - name: Prepare desktop build (bootJar — bypass task CLI)
+        # xiaoyao-pdf fork: Go-Task v3.52 special-cases any cmd line containing
+        # "gradlew"/"gradle.bat" and tries to resolve a wrapper jar at
+        # <cwd>/.gradle/wrapper/ before running it, which is wrong for our nested
+        # monorepo. Call gradlew.bat directly here; run the remaining desktop
+        # sub-tasks (jlink:runtime / frontend:prepare / provisioner) via task.
+        working-directory: Stirling-PDF-main
+        shell: cmd
         env:
           MAVEN_USER: ${{ secrets.MAVEN_USER }}
           MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
           MAVEN_PUBLIC_URL: ${{ secrets.MAVEN_PUBLIC_URL }}
           DISABLE_ADDITIONAL_FEATURES: true
           JPDFIUM_PLATFORMS: ${{ matrix.jpdfium_platforms }}
-        run: task desktop:prepare
+        run: |
+          gradlew.bat bootJar --no-daemon -PjpdfiumPlatforms=%JPDFIUM_PLATFORMS%
+          if errorlevel 1 exit /b %errorlevel%
+          mkdir frontend\editor\src-tauri\libs 2>nul
+          copy /Y app\core\build\libs\stirling-pdf-*.jar frontend\editor\src-tauri\libs\
+
+      - name: Prepare desktop build (jlink + frontend + provisioner)
+        working-directory: Stirling-PDF-main
+        env:
+          MAVEN_USER: ${{ secrets.MAVEN_USER }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+          MAVEN_PUBLIC_URL: ${{ secrets.MAVEN_PUBLIC_URL }}
+          DISABLE_ADDITIONAL_FEATURES: true
+          JPDFIUM_PLATFORMS: ${{ matrix.jpdfium_platforms }}
+        run: task desktop:jlink:runtime frontend:prepare desktop:provisioner
 
       - name: Run Tauri/Cargo tests
         run: task desktop:test
