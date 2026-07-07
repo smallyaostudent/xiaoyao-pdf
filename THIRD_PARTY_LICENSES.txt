@@ -1,0 +1,37 @@
+Third-Party Licenses
+====================
+
+This is a placeholder. For the full per-dependency license list, run on
+a machine with JDK 25 + Gradle 9.6 + Maven Central network access:
+
+    cd "E:\PDF编辑工具\PDF编辑工具1.0\Stirling-PDF-main"
+    ./gradlew.bat dependencyLicenseReport
+
+The output is at:
+    build/reports/dependency-license/dependency-license-report.json
+
+Append the dependency-by-dependency license list to this file (or to
+NOTICE) once generated.
+
+License families present in the dependency tree (per upstream
+`app/allowed-licenses.json`):
+
+    Apache License 2.0          (whitelisted)
+    MIT License                 (whitelisted)
+    BSD 2-clause / 3-clause     (whitelisted)
+    MPL 2.0                     (whitelisted, file-level copyleft)
+    EPL 2.0                     (whitelisted)
+    CDDL 1.0 / 1.1              (whitelisted)
+    LGPL 2.1 / 3.0              (whitelisted)
+    Public Domain / Unlicense   (whitelisted)
+    ISC License                  (whitelisted)
+    JSON License                 (whitelisted)
+    CC0 / CC-BY 3.0 / 4.0       (whitelisted)
+
+For details on each dependency, see NOTICE and the Gradle report.
+
+---
+
+Copyright 2026 xiaoyao-pdf contributors
+Distributed under Apache License 2.0
+See LICENSE and NOTICE for full attribution.

@@ -1,0 +1,25 @@
+/*
+ * xiaoyao-pdf global styles
+ * Tailwind base layer + minimal global resets.
+ * NO component-specific styles here (use Mantine theme or Tailwind utilities).
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+      'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Replace Mantine default focus outline with xiaoyao-pdf brand color */
+  :focus-visible {
+    outline: 2px solid #0F3D3E;
+    outline-offset: 2px;
+  }
+}

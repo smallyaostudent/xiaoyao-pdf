@@ -1,0 +1,91 @@
+# xiaoyao-pdf NOTICE
+
+This product includes software developed at
+Stirling-Tools/Stirling-PDF (https://github.com/Stirling-Tools/Stirling-PDF).
+
+Original Stirling-PDF is dual-licensed:
+- The core backend (`app/core/`) and common utilities (`app/common/`) are
+  MIT-licensed (Copyright Stirling PDF Inc.).
+- The proprietary module (`app/proprietary/`) is under the Stirling PDF
+  User License (commercial).
+- The Python engine (`engine/`) is under the Stirling PDF User License.
+
+xiaoyao-pdf fork is distributed under Apache License 2.0 (see LICENSE).
+This NOTICE summarizes third-party attribution required by the upstream
+licenses.
+
+---
+
+## Detailed per-dependency license report
+
+This NOTICE contains a stub for the full per-dependency license list. To
+generate the complete report, run on a machine with JDK 25 + Gradle 9.6 +
+network access to Maven Central:
+
+```bash
+cd "E:\PDF编辑工具\PDF编辑工具1.0\Stirling-PDF-main"
+./gradlew.bat dependencyLicenseReport
+```
+
+The output JSON lives at `build/reports/dependency-license/dependency-license-report.json`.
+Append a per-dependency table here once generated.
+
+---
+
+## Known license families in the dependency tree (from build.gradle allowed-licenses.json)
+
+The upstream project whitelists the following license families in
+`app/allowed-licenses.json`. Any dependency under these licenses is
+compatible with xiaoyao-pdf's Apache 2.0 distribution:
+
+- Apache License 2.0
+- MIT License
+- BSD License (2-clause, 3-clause)
+- Mozilla Public License 2.0 (MPL 2.0) — file-level copyleft only
+- Eclipse Public License 2.0 (EPL 2.0)
+- Common Development and Distribution License (CDDL) 1.0 / 1.1
+- GNU Lesser General Public License (LGPL) 2.1 / 3.0
+- Public Domain / Unlicense
+- ISC License
+- JSON License
+- Creative Commons (CC0 / CC-BY 3.0 / CC-BY 4.0)
+
+---
+
+## Modifications from upstream
+
+xiaoyao-pdf fork applies the following modifications relative to upstream
+Stirling-PDF v2.14.0. All modifications are licensed under Apache 2.0 by
+the xiaoyao-pdf contributors.
+
+1. **Brand replacement** — "Stirling-PDF" / "Stirling" replaced with
+   "xiaoyao-pdf" / "xiaoyao" in user-facing text (UI labels, settings.yml
+   defaults, email templates, static HTML pages). NOT replaced in:
+   - Package names (`stirling.software.*`)
+   - Class names (`StirlingPDF`, `SPDFApplication`)
+   - LICENSE / NOTICE attribution text
+   - GitHub URLs pointing to Stirling-Tools/Stirling-PDF repo
+2. **Internal/air-gapped defaults** — PostHog / Scarf / OIDC / SAML2 /
+   AATL / EUTL / remote version check / remote TSA all default to off
+   or to internal placeholders (see `docs/internal-deployment.md`).
+3. **Default security** — `security.enableLogin: true`, initial admin
+   user pre-seeded to "admin", login agreement popup enabled by default
+   with `customFiles/disclaimer/zh-CN.md`.
+4. **Design tokens** — `frontend/editor/src/core/theme/` defines
+   xiaoyao-pdf brand color (#0F3D3E), spacing, typography. Does not
+   replace any existing component library.
+5. **License file** — Apache License 2.0 with explicit attribution to
+   Stirling-Tools/Stirling-PDF.
+
+---
+
+## Trademark notice
+
+"Stirling-PDF" is a trademark of Stirling PDF Inc. Use of the name
+"Stirling-PDF" in derivative works must comply with the Stirling PDF
+trademark policy. xiaoyao-pdf does NOT claim any rights to the
+"Stirling-PDF" name; users of xiaoyao-pdf may not re-distribute xiaoyao-pdf
+under the "Stirling-PDF" brand name.
+
+For commercial licensing of Stirling-PDF itself (the upstream product),
+contact Stirling PDF Inc. directly.

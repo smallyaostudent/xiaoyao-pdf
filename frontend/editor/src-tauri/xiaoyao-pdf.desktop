@@ -1,0 +1,16 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=xiaoyao-pdf
+Comment=Locally hosted PDF editing tool (fork of Stirling-PDF)
+TryExec={{exec}}
+Exec={{exec}} %F
+Icon={{icon}}
+Terminal=false
+MimeType=application/pdf;
+Categories=Office;Graphics;Utility;
+Actions=open-file;
+
+[Desktop Action open-file]
+Name=Open PDF File
+Exec={{exec}} %F
