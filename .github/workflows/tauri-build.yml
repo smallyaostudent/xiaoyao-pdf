@@ -175,15 +175,17 @@ jobs:
       - name: Prepare desktop build (bootJar — bypass task CLI)
         # xiaoyao-pdf fork: Go-Task v3.52 special-cases any cmd line containing
         # "gradlew"/"gradle.bat" and tries to resolve a wrapper jar at
-        # <cwd>/.gradle/wrapper/ before running it, which is wrong for our nested
-        # monorepo. Call gradlew.bat directly here; run the remaining desktop
-        # sub-tasks (jlink:runtime / frontend:prepare / provisioner) via task.
+        # <cwd>/.gradle/wrapper/ before running it, which is wrong for our
+        # nested monorepo. Call gradlew.bat directly here; run the remaining
+        # desktop sub-tasks (jlink:runtime / frontend:prepare / provisioner)
+        # via task.
         #
-        # Also: previously used `working-directory: Stirling-PDF-main`, but on
-        # windows-latest that resolved to <repo-name>/Stirling-PDF-main which
-        # nested the path into <workspace>/<repo-name>/Stirling-PDF-main/ —
-        # wrong sub-path. Use %GITHUB_WORKSPACE%\Stirling-PDF-main explicitly
-        # via cd /d so the path is always correct.
+        # IMPORTANT: the repository is the fork itself — there is NO
+        # Stirling-PDF-main/ subdirectory inside the repo. gradlew.bat lives
+        # directly at GITHUB_WORKSPACE/ because git init was performed from
+        # inside the Stirling-PDF source root before the first commit. So
+        # cd /d "%GITHUB_WORKSPACE%" is correct; an extra "Stirling-PDF-main"
+        # sub-path would point at a directory that does not exist.
         shell: cmd
         env:
           MAVEN_USER: ${{ secrets.MAVEN_USER }}
@@ -193,12 +195,12 @@ jobs:
           JPDFIUM_PLATFORMS: ${{ matrix.jpdfium_platforms }}
         run: |
           echo GITHUB_WORKSPACE=%GITHUB_WORKSPACE%
-          if not exist "%GITHUB_WORKSPACE%\Stirling-PDF-main\gradlew.bat" (
-            echo ERROR: gradlew.bat not found at %GITHUB_WORKSPACE%\Stirling-PDF-main\gradlew.bat
+          if not exist "%GITHUB_WORKSPACE%\gradlew.bat" (
+            echo ERROR: gradlew.bat not found at %GITHUB_WORKSPACE%\gradlew.bat
             dir "%GITHUB_WORKSPACE%"
             exit /b 1
           )
-          cd /d "%GITHUB_WORKSPACE%\Stirling-PDF-main"
+          cd /d "%GITHUB_WORKSPACE%"
           gradlew.bat bootJar --no-daemon -PjpdfiumPlatforms=%JPDFIUM_PLATFORMS%
           if errorlevel 1 exit /b %errorlevel%
           if not exist frontend\editor\src-tauri\libs mkdir frontend\editor\src-tauri\libs
@@ -213,7 +215,7 @@ jobs:
           DISABLE_ADDITIONAL_FEATURES: true
           JPDFIUM_PLATFORMS: ${{ matrix.jpdfium_platforms }}
         run: |
-          cd /d "%GITHUB_WORKSPACE%\Stirling-PDF-main"
+          cd /d "%GITHUB_WORKSPACE%"
           task desktop:jlink:runtime frontend:prepare desktop:provisioner
 
       - name: Run Tauri/Cargo tests
