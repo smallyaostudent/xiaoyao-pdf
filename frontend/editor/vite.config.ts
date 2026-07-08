@@ -118,13 +118,32 @@ function prerenderOgPlugin(): PluginOption {
         return;
       }
       const distDir = path.resolve(__dirname, "dist");
-      const count = await prerenderOg({ distDir, manifest, ogBase, baseHref });
-      console.log(
-        `[prerender-og] wrote ${count} prerendered route pages` +
-          (ogBase
-            ? ` (absolute URLs, base=${ogBase})`
-            : " (root-relative URLs)"),
-      );
+      // xiaoyao-pdf fork: if the Vite build itself aborted earlier in
+      // closeBundle pipeline (e.g. a missing vendor copy target logged
+      // via vite-plugin-static-copy), dist/index.html may not exist.
+      // Log a warning and skip prerender so the build still completes;
+      // desktop users can fall back to runtime OG generation.
+      try {
+        await fs.access(path.join(distDir, "index.html"));
+      } catch {
+        console.warn(
+          `[prerender-og] ${distDir}/index.html missing; skipping OG prerender ` +
+            `because an earlier Vite pipeline step aborted. Check viteStaticCopy ` +
+            `targets and node_modules layout.`,
+        );
+        return;
+      }
+      try {
+        const count = await prerenderOg({ distDir, manifest, ogBase, baseHref });
+        console.log(
+          `[prerender-og] wrote ${count} prerendered route pages` +
+            (ogBase
+              ? ` (absolute URLs, base=${ogBase})`
+              : " (root-relative URLs)"),
+        );
+      } catch (e) {
+        console.warn(`[prerender-og] prerender failed, skipping:`, e);
+      }
     },
   };
 }
