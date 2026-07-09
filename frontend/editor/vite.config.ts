@@ -1,5 +1,6 @@
 import react from "@vitejs/plugin-react-swc";
 import { compression, defineAlgorithm } from "vite-plugin-compression2";
+import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path, { resolve } from "node:path";
 import { constants, brotliCompress, gzip } from "node:zlib";
@@ -233,6 +234,72 @@ export default defineConfig(async ({ mode }) => {
           "/v1/api-docs": backendProxy,
         };
 
+  // ============================================================================
+  // xiaoyao-pdf fork: filesystem-fallback alias resolver.
+  //
+  // Cascade order for @app/* — matches the layer design documented in
+  // AGENTS.md. For each import we prefer the first candidate that
+  // actually exists on disk, falling through the cascade. This makes
+  // desktop builds work even when the desktop layer does not shadow
+  // a particular component (it simply falls back to proprietary/core).
+  //
+  // Rationale for replacing vite-tsconfig-paths with a custom
+  // resolver:
+  //
+  //  - vite-tsconfig-paths v5 picks the FIRST candidate of the `paths`
+  //    array and does NOT fall through to the next one when that
+  //    file is missing. The desktop cascade (desktop/ -> cloud/ ->
+  //    proprietary/ -> core/) only works when every leaf path also
+  //    has a desktop-layer override, which is unrealistic for fork
+  //    builds that only override a handful of desktop-specific
+  //    components.
+  //
+  //  - The `loose: true` option in v5.1.4 only widens the importer
+  //    extension-name match (it does NOT enable filesystem fallback),
+  //    so it does not fix the cascade either.
+  //
+  // tsconfigPaths stays in the plugin list to keep handling any
+  // ad-hoc aliases we did not enumerate below; the @app/* resolver
+  // takes precedence because Vite applies `resolve.alias` entries
+  // before plugin-time resolution and ours matches the import
+  // prefix first.
+  // ============================================================================
+
+  const APP_CASCADE = ["desktop", "cloud", "proprietary", "core"] as const;
+  const APP_EXTS = ["", ".tsx", ".ts", "/index.tsx", "/index.ts"] as const;
+  const SIMPLE_LAYER = {
+    "@proprietary": "proprietary",
+    "@cloud": "cloud",
+    "@core": "core",
+  } as const;
+
+  function resolveAppAlias(match: string): string {
+    const m = match.match(/^@app\/(.+)$/);
+    if (!m) return match;
+    const subpath = m[1];
+    const base = resolve(__dirname, "src");
+    for (const layer of APP_CASCADE) {
+      const candidate = resolve(base, layer, subpath);
+      for (const ext of APP_EXTS) {
+        if (existsSync(candidate + ext)) return candidate;
+      }
+    }
+    // No candidate exists on disk - return the first one anyway so
+    // Vite/Rollup reports a clear "file not found" pointing at the
+    // expected path instead of a generic alias failure.
+    return resolve(base, APP_CASCADE[0], subpath);
+  }
+
+  function resolveSimpleLayerAlias(match: string): string {
+    for (const [prefix, layer] of Object.entries(SIMPLE_LAYER)) {
+      if (match === prefix || match.startsWith(prefix + "/")) {
+        const subpath = match.slice(prefix.length + 1);
+        return resolve(__dirname, "src", layer, subpath);
+      }
+    }
+    return match;
+  }
+
   return {
     plugins: [
       react(),
@@ -306,6 +373,24 @@ export default defineConfig(async ({ mode }) => {
       compressStaticCopyPlugin(),
       prerenderOgPlugin(),
     ],
+    resolve: {
+      // xiaoyao-pdf fork: filesystem-fallback resolver — see the comment
+      // block above the `return {` for the design rationale. The two
+      // aliases below complement tsconfig-paths (still loaded for any
+      // other alias we did not enumerate) by adding true cascade
+      // resolution for @app/* and direct resolution for @proprietary/,
+      // @cloud/, and @core/.
+      alias: [
+        {
+          find: /^@app\/.+$/,
+          replacement: resolveAppAlias,
+        },
+        {
+          find: /^@(proprietary|cloud|core)\/.+$/,
+          replacement: resolveSimpleLayerAlias,
+        },
+      ],
+    },
     server: {
       host: true,
       allowedHosts: allowedHosts.length > 0 ? allowedHosts : undefined,
